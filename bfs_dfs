@@ -1,0 +1,53 @@
+import threading
+graph={
+    0:[1,2],
+    1:[0,3,4],
+    2:[0,5],
+    3:[1],
+    4:[1,5],
+    5:[2,4]
+}
+
+def bfs(start):
+    visited=set([start])
+    queue=[start]
+    print("BFS:", end=" ")
+    
+    while queue:
+        node=queue.pop(0)
+        print(node, end=" ")
+        threads =[]
+        
+        for neighbor in graph[node]:
+            if neighbor  not in visited:
+                visited.add(neighbor)
+                t=threading.Thread(target=lambda x: queue.append(x),  args=(neighbor,))
+                t.start()
+                threads.append(t)
+        for t in threads:
+            t.join()
+            
+def dfs(start):
+    visited=set()
+    stack=[start]
+    print("\nDFS:", end=" ")
+    
+    while stack:
+        node=stack.pop()
+        if node not in visited:
+            visited.add(node)
+            print(node, end=" ")
+            threads =[]
+        
+            for neighbor in graph[node]:
+                if neighbor  not in visited:
+                    
+                    t=threading.Thread(target=lambda x: stack.append(x),  args=(neighbor,))
+                    t.start()
+                    threads.append(t)
+            for t in threads:
+                t.join()
+bfs(0)
+dfs(0)
+            
+        
