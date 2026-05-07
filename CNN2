@@ -1,0 +1,134 @@
+# =========================================
+# CNN for Image Classification using CSV
+# =========================================
+
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+
+from sklearn.model_selection import train_test_split
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import (
+    Conv2D,
+    MaxPooling2D,
+    Flatten,
+    Dense
+)
+
+# -----------------------------------------
+# Load CSV File
+# -----------------------------------------
+
+data = pd.read_csv("fashion_data.csv")
+
+print(data.head())
+
+# -----------------------------------------
+# Separate Features and Labels
+# -----------------------------------------
+
+X = data.iloc[:, 1:].values
+y = data.iloc[:, 0].values
+
+# -----------------------------------------
+# Normalize Pixel Values
+# -----------------------------------------
+
+X = X / 255.0
+
+# -----------------------------------------
+# Reshape Data for CNN
+# -----------------------------------------
+
+X = X.reshape(-1, 28, 28, 1)
+
+print("Shape after reshape:", X.shape)
+
+# -----------------------------------------
+# Split Dataset
+# -----------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+# -----------------------------------------
+# Build CNN Model
+# -----------------------------------------
+
+model = Sequential()
+
+# First Convolution Layer
+model.add(
+    Conv2D(
+        32,
+        (3,3),
+        activation='relu',
+        input_shape=(28,28,1)
+    )
+)
+
+# First Pooling Layer
+model.add(MaxPooling2D((2,2)))
+
+# Second Convolution Layer
+model.add(
+    Conv2D(
+        64,
+        (3,3),
+        activation='relu'
+    )
+)
+
+# Second Pooling Layer
+model.add(MaxPooling2D((2,2)))
+
+# Flatten Layer
+model.add(Flatten())
+
+# Fully Connected Layer
+model.add(Dense(64, activation='relu'))
+
+# Output Layer
+model.add(Dense(10, activation='softmax'))
+
+# -----------------------------------------
+# Compile Model
+# -----------------------------------------
+
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# -----------------------------------------
+# Train Model
+# -----------------------------------------
+
+history = model.fit(
+    X_train,
+    y_train,
+    epochs=5,
+    validation_split=0.1
+)
+
+# -----------------------------------------
+# Evaluate Model
+# -----------------------------------------
+
+loss, accuracy = model.evaluate(X_test, y_test)
+
+print("\nTest Accuracy:", accuracy)
+
+# -----------------------------------------
+# Predictions
+# -----------------------------------------
+
+predictions = model.predict(X_test[:5])
+
+print(predictions)
